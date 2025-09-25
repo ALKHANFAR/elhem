@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إلهام - نظام إدارة المهام الذكي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 70%;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot {
+            background: white;
+            border: 1px solid #e9ecef;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message .sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .message .content {
+            line-height: 1.4;
+        }
+
+        .task-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .task-card .task-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .task-card .task-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .priority-high { color: #dc3545; }
+        .priority-medium { color: #ffc107; }
+        .priority-low { color: #28a745; }
+
+        .complete-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .complete-btn:hover {
+            background: #218838;
+        }
+
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .login-form {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-form.show {
+            display: flex;
+        }
+
+        .login-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .tasks-section {
+            margin-top: 30px;
+        }
+
+        .tasks-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .task-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .task-item .task-name {
+            flex: 2;
+        }
+
+        .task-item .task-assignee {
+            flex: 1;
+        }
+
+        .task-item .remove-task {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-task-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .create-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Admin Panel Styles */
+        .admin-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .admin-tab-content {
+            display: none;
+        }
+
+        .admin-tab-content.active {
+            display: block;
+        }
+
+        .current-personality {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .change-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .users-list {
+            margin-top: 20px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .user-info h4 {
+            margin: 0;
+            color: #333;
+        }
+
+        .user-role {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .save-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .close-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .input-container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>إلهام</h1>
+            <p>مساعدك الذكي لإدارة المهام</p>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <span id="currentUser">غير مسجل</span>
+        </div>
+
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message bot">
+                    <div class="sender">إلهام</div>
+                    <div class="content">مرحباً! أنا إلهام، مساعدك الذكي لإدارة المهام. يرجى تسجيل الدخول أولاً للبدء.</div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <input type="text" class="message-input" id="messageInput" placeholder="اكتب رسالتك هنا..." disabled>
+                <button class="send-btn" id="sendBtn" disabled>
+                    <span id="sendText">إرسال</span>
+                    <div class="loading" id="loading" style="display: none;"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-form" id="loginForm">
+        <div class="login-card">
+            <h2>تسجيل الدخول</h2>
+            <input type="text" id="usernameInput" placeholder="اسم المستخدم">
+            <input type="password" id="passwordInput" placeholder="كلمة المرور">
+            <button id="loginBtn">دخول</button>
+            <div class="error-message" id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div class="modal" id="adminPanelModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ لوحة الإدارة</h2>
+                <span class="close" id="closeAdminModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="admin-tabs">
+                    <button class="tab-btn active" onclick="showAdminTab('personality')">شخصية البوت</button>
+                    <button class="tab-btn" onclick="showAdminTab('stats')">الإحصائيات</button>
+                    <button class="tab-btn" onclick="showAdminTab('users')">إدارة المستخدمين</button>
+                    <button class="tab-btn" onclick="showAdminTab('ai')">إعدادات الذكاء الاصطناعي</button>
+                </div>
+
+                <div id="personalityTab" class="admin-tab-content active">
+                    <h3>🎭 إدارة شخصية البوت</h3>
+                    <div class="form-group">
+                        <label>الشخصية الحالية:</label>
+                        <div class="current-personality" id="currentPersonalityDisplay"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>تغيير الشخصية:</label>
+                        <select id="personalitySelect">
+                            <option value="ودود">ودود - ودود ومشجع</option>
+                            <option value="رسمي">رسمي - رسمي ومهني</option>
+                            <option value="صارم">صارم - صارم ومباشر</option>
+                        </select>
+                        <button class="change-btn" onclick="changePersonalityFromAdmin()">تغيير</button>
+                    </div>
+                </div>
+
+                <div id="statsTab" class="admin-tab-content">
+                    <h3>📊 إحصائيات النظام</h3>
+                    <div class="stats-grid" id="systemStats">
+                        <!-- سيتم ملؤها بالجافا سكريبت -->
+                    </div>
+                </div>
+
+                <div id="usersTab" class="admin-tab-content">
+                    <h3>👥 إدارة المستخدمين</h3>
+                    <div class="users-list" id="usersList">
+                        <!-- سيتم ملؤها بالجافا سكريبت -->
+                    </div>
+                </div>
+
+                <div id="aiTab" class="admin-tab-content">
+                    <h3>🤖 إعدادات الذكاء الاصطناعي</h3>
+                    <div class="form-group">
+                        <label for="openaiKey">مفتاح OpenAI API:</label>
+                        <input type="password" id="openaiKey" placeholder="أدخل مفتاح API">
+                    </div>
+                    <div class="form-group">
+                        <label for="aiModel">نموذج الذكاء الاصطناعي:</label>
+                        <select id="aiModel">
+                            <option value="gpt-4o-mini">GPT-4o Mini</option>
+                            <option value="gpt-4">GPT-4</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        </select>
+                    </div>
+                    <button class="save-btn" onclick="saveAISettings()">حفظ الإعدادات</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="close-btn" id="closeAdminPanel">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Project Modal -->
+    <div class="modal" id="newProjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏗️ إنشاء مشروع جديد</h2>
+                <span class="close" id="closeProjectModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="projectName">اسم المشروع:</label>
+                    <input type="text" id="projectName" placeholder="أدخل اسم المشروع">
+                </div>
+                <div class="form-group">
+                    <label for="projectDescription">وصف المشروع:</label>
+                    <textarea id="projectDescription" placeholder="وصف مختصر للمشروع"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="projectPriority">الأولوية:</label>
+                    <select id="projectPriority">
+                        <option value="Low">منخفضة</option>
+                        <option value="Medium" selected>متوسطة</option>
+                        <option value="High">عالية</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="projectDueDate">تاريخ الاستحقاق:</label>
+                    <input type="date" id="projectDueDate">
+                </div>
+                <div class="tasks-section">
+                    <h3>المهام المطلوبة:</h3>
+                    <div id="tasksList">
+                        <div class="task-item">
+                            <input type="text" class="task-name" placeholder="اسم المهمة">
+                            <select class="task-assignee">
+                                <option value="">اختر المسؤول</option>
+                            </select>
+                            <button class="remove-task" onclick="removeTask(this)">حذف</button>
+                        </div>
+                    </div>
+                    <button class="add-task-btn" onclick="addTask()">إضافة مهمة</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" id="cancelProject">إلغاء</button>
+                <button class="create-btn" id="createProject">إنشاء المشروع</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="elhem.js"></script>
+</body>
+</html>

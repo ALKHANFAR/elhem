@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "68d2ab602739fef734a29d6e",
+    "employeeId": "E008",
+    "name": "غفران",
+    "email": "ghofrane.o@d10.sa",
+    "slackId": "U097R9LSW4A",
+    "department": "المبيعات",
+    "role": "Employee",
+    "managerId": "E004",
+    "managerName": "أماني",
+    "developmentGoals": "تعلم تقنيات التفاوض",
+    "lastReportDate": "2025-09-18"
+  },
+  {
+    "_id": "68d2ab602739fef734a29d6f",
+    "employeeId": "E015",
+    "name": "سمية",
+    "email": "somaya.a@d10.sa",
+    "slackId": "U07A4NQJC2U",
+    "department": "سندس AI",
+    "role": "Employee",
+    "managerId": "E017",
+    "managerName": "بسنت",
+    "developmentGoals": "تطوير مهارات البرمجة",
+    "lastReportDate": "2025-09-18"
+  },
+  {
+    "_id": "68d2ab602739fef734a29d70",
+    "employeeId": "E019",
+    "name": "يارا",
+    "email": "yara.h@d10.sa",
+    "slackId": "U07837XTQUR",
+    "department": "سندس AI",
+    "role": "Employee",
+    "managerId": "E017",
+    "managerName": "بسنت",
+    "developmentGoals": "تطوير مهارات التحليل",
+    "lastReportDate": "2025-09-18"
+  },
+  {
+    "_id": "68d2ab602739fef734a29d71",
+    "employeeId": "E020",
+    "name": "عماد",
+    "email": "emad.a@d10.sa",
+    "slackId": "U080W48MATC",
+    "department": "المالية",
+    "role": "Manager",
+    "managerId": "E001",
+    "managerName": "عبدالرحمن",
+    "developmentGoals": "تطوير المهارات المالية والمحاسبية",
+    "lastReportDate": "2025-09-18"
+  },
+  {
+    "_id": "68d2ab602739fef734a29d72",
+    "employeeId": "EMP001",
+    "name": "Test User",
+    "email": "test@example.com",
+    "role": "Employee",
+    "department": "IT"
+  }
+]

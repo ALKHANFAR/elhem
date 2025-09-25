@@ -1,0 +1,18 @@
+[
+  {
+    "employeeId": "E001",
+    "name": "سارة",
+    "completedTasks": 5,
+    "totalTasks": 8,
+    "averageRating": 4.2,
+    "month": "2025-01"
+  },
+  {
+    "employeeId": "M001",
+    "name": "عبدالرحمن",
+    "completedTasks": 12,
+    "totalTasks": 15,
+    "averageRating": 4.5,
+    "month": "2025-01"
+  }
+]
